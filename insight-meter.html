@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Insight Meter — Ovie</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600&family=Source+Serif+4:wght@600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    button { font-family: 'Source Sans 3', sans-serif; }
+
+    body {
+      background: #e8e8e8;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      font-family: 'Source Sans 3', sans-serif;
+    }
+
+    /* ── Mobile Frame ───────────────────────── */
+    .screen {
+      position: relative;
+      width: 360px;
+      height: 800px;
+      background: #faf8f4;
+      overflow: hidden;
+      border-radius: 28px;
+      box-shadow: 0 24px 64px rgba(0,0,0,.25);
+    }
+
+    /* ── Status Bar ─────────────────────────── */
+    .status-bar {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 52px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      padding: 0 24px 10px;
+    }
+    .status-bar .time {
+      font-family: 'Source Sans 3', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      color: #1d1b20;
+      letter-spacing: .14px;
+    }
+    .status-bar .icons {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .status-bar .camera {
+      position: absolute;
+      top: 18px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 24px;
+      height: 24px;
+      background: #1d1b20;
+      border-radius: 50%;
+    }
+
+    /* ── Top Bar ────────────────────────────── */
+    .top-bar {
+      position: absolute;
+      top: 68px;
+      left: 24px;
+      width: 312px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      padding-bottom: 10px;
+    }
+    .top-bar-inner {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      width: 100%;
+    }
+    .top-bar-back {
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .top-bar-text {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      padding-right: 24px;
+    }
+    .top-bar-title {
+      font-family: 'Source Serif 4', serif;
+      font-size: 18px;
+      font-weight: 600;
+      color: #1c2b2e;
+      line-height: 24px;
+      text-align: center;
+    }
+    .top-bar-subtitle {
+      font-family: 'Source Sans 3', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      color: #516c71;
+      line-height: 18px;
+      text-align: center;
+    }
+
+    /* ── Doc Upload Cards ───────────────────── */
+    .cards-container {
+      position: absolute;
+      top: 174px;
+      left: 24px;
+      width: 312px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .doc-card {
+      background: #ffffff;
+      border-radius: 20px;
+      padding: 16px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      align-items: flex-end;
+    }
+    .doc-card-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      width: 100%;
+    }
+    .doc-card-left {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      flex: 1;
+    }
+    .icon-container {
+      background: #dbeef2;
+      border-radius: 8px;
+      width: 37px;
+      height: 34px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .doc-card-info {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .doc-card-name {
+      font-size: 15px;
+      font-weight: 500;
+      color: #1c2b2e;
+      line-height: 22px;
+    }
+    .doc-files-list {
+      background: #dbeef2;
+      border-radius: 8px;
+      padding: 8px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      position: relative;
+    }
+    .doc-file-item {
+      font-size: 13px;
+      font-weight: 500;
+      color: #516c71;
+      line-height: 18px;
+      list-style: disc;
+      margin-left: 16px;
+    }
+    .doc-files-chevron {
+      position: absolute;
+      right: 8px;
+      top: 8px;
+      transform: rotate(270deg);
+    }
+    .doc-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .doc-policy-num {
+      font-size: 12px;
+      font-weight: 400;
+      color: #516c71;
+      line-height: 18px;
+      letter-spacing: -0.24px;
+    }
+    .doc-tags {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+    }
+    .doc-tag {
+      font-size: 12px;
+      font-weight: 400;
+      color: #516c71;
+      line-height: 18px;
+      letter-spacing: -0.24px;
+    }
+    .dot {
+      width: 3px;
+      height: 3px;
+      border-radius: 50%;
+      background: #516c71;
+    }
+    .trash-btn {
+      padding-top: 4px;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .doc-card-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 239px;
+      padding-right: 4px;
+    }
+    .btn-primary-sm {
+      background: #0c8ca6;
+      border-radius: 8px;
+      padding: 8px 0;
+      width: 133px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    .btn-primary-sm span {
+      font-family: 'Source Sans 3', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      color: #ffffff;
+      line-height: 22px;
+      white-space: nowrap;
+    }
+    .btn-text-sm {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    .btn-text-sm span {
+      font-family: 'Source Sans 3', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      color: #096f84;
+      line-height: 22px;
+      white-space: nowrap;
+    }
+
+    /* ── Go To My Files Button ──────────────── */
+    .btn-go-files {
+      position: absolute;
+      bottom: 70px;
+      left: 24px;
+      width: 312px;
+      border: 0.5px solid #0c8ca6;
+      border-radius: 8px;
+      padding: 8px 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      cursor: pointer;
+      background: transparent;
+    }
+    .btn-go-files span {
+      font-family: 'Source Sans 3', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      color: #0c8ca6;
+      line-height: 22px;
+      white-space: nowrap;
+    }
+
+    /* ── Dimmed Overlay ─────────────────────── */
+    .overlay {
+      position: absolute;
+      inset: 0;
+      background: #c5cfd1;
+      opacity: 0.7;
+      z-index: 10;
+    }
+
+    /* ── Insight Meter Popup ────────────────── */
+    .popup {
+      position: absolute;
+      top: 61px;
+      left: 24px;
+      width: 312px;
+      background: #ffffff;
+      border-radius: 8px;
+      padding: 23px 13px;
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+      align-items: center;
+      z-index: 20;
+      overflow: hidden;
+    }
+
+    /* Popup top section */
+    .popup-top {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      align-items: flex-start;
+      width: 100%;
+    }
+    .popup-header-row {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      width: 100%;
+    }
+    .popup-title-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+    }
+    .popup-title {
+      font-family: 'Source Serif 4', serif;
+      font-size: 18px;
+      font-weight: 600;
+      color: #1c2b2e;
+      line-height: 24px;
+    }
+    .close-btn {
+      width: 22px;
+      height: 22px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .popup-policy-type {
+      font-size: 15px;
+      font-weight: 500;
+      color: #516c71;
+      line-height: 22px;
+    }
+    .popup-policy-num {
+      font-size: 15px;
+      font-weight: 500;
+      color: #516c71;
+      line-height: 22px;
+    }
+
+    /* Meter gauge card */
+    .meter-card {
+      background: #dbeef2;
+      border-radius: 8px;
+      padding: 0 10px 16px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+    .meter-gauge-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+    .meter-gauge-img {
+      width: 186.741px;
+      height: 111px;
+      object-fit: contain;
+    }
+    .meter-label {
+      font-size: 15px;
+      font-weight: 600;
+      color: #1c2b2e;
+      line-height: 22px;
+    }
+    .meter-desc {
+      font-size: 13px;
+      font-weight: 500;
+      color: #096f84;
+      line-height: 18px;
+      text-align: center;
+      max-width: 186px;
+    }
+
+    /* Document coverage */
+    .coverage-section {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      width: 100%;
+    }
+    .coverage-label {
+      font-size: 13px;
+      font-weight: 500;
+      color: #516c71;
+      line-height: 18px;
+      white-space: nowrap;
+    }
+    .coverage-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .coverage-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 18px;
+    }
+    .coverage-item-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .coverage-item-name {
+      font-size: 15px;
+      font-weight: 500;
+      color: #1c2b2e;
+      line-height: 22px;
+      white-space: nowrap;
+    }
+    .coverage-item-name.missing {
+      color: #516c71;
+    }
+    .coverage-item-status {
+      font-size: 13px;
+      font-weight: 500;
+      color: #1c2b2e;
+      line-height: 18px;
+      white-space: nowrap;
+    }
+    .coverage-item-status.missing {
+      color: #516c71;
+    }
+
+    /* Popup actions */
+    .popup-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      align-items: center;
+      width: 100%;
+    }
+    .popup-hint {
+      font-size: 12px;
+      font-weight: 500;
+      color: #516c71;
+      line-height: 18px;
+      text-align: center;
+      letter-spacing: -0.24px;
+      white-space: nowrap;
+    }
+    .btn-generate {
+      background: #0c8ca6;
+      border-radius: 8px;
+      padding: 8px 0;
+      width: 286px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      border: none;
+    }
+    .btn-generate span {
+      font-family: 'Source Sans 3', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      color: #ffffff;
+      line-height: 22px;
+      white-space: nowrap;
+    }
+    .btn-upload-more {
+      border: 0.5px solid #0c8ca6;
+      border-radius: 8px;
+      padding: 8px 0;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      background: transparent;
+    }
+    .btn-upload-more span {
+      font-family: 'Source Sans 3', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      color: #0c8ca6;
+      line-height: 22px;
+      white-space: nowrap;
+    }
+  </style>
+</head>
+<body>
+
+<div class="screen">
+
+  <!-- Status Bar -->
+  <div class="status-bar">
+    <span class="time">9:30</span>
+    <div class="camera"></div>
+    <div class="icons">
+      <!-- Wifi -->
+      <svg width="17" height="17" viewBox="0 0 17 17" fill="none">
+        <path d="M8.5 12.5a1 1 0 1 1 0 2 1 1 0 0 1 0-2z" fill="#1d1b20"/>
+        <path d="M5.5 10.1a4.5 4.5 0 0 1 6 0" stroke="#1d1b20" stroke-width="1.2" stroke-linecap="round" fill="none"/>
+        <path d="M3 7.6a8 8 0 0 1 11 0" stroke="#1d1b20" stroke-width="1.2" stroke-linecap="round" fill="none"/>
+        <path d="M1 5.2A11 11 0 0 1 16 5.2" stroke="#1d1b20" stroke-width="1.2" stroke-linecap="round" fill="none"/>
+      </svg>
+      <!-- Signal -->
+      <svg width="17" height="17" viewBox="0 0 17 17" fill="none">
+        <rect x="1" y="11" width="2.5" height="4" rx="1" fill="#1d1b20" opacity=".4"/>
+        <rect x="5" y="8" width="2.5" height="7" rx="1" fill="#1d1b20" opacity=".4"/>
+        <rect x="9" y="5" width="2.5" height="10" rx="1" fill="#1d1b20"/>
+        <rect x="13" y="1" width="2.5" height="14" rx="1" fill="#1d1b20"/>
+      </svg>
+      <!-- Battery -->
+      <svg width="27" height="14" viewBox="0 0 27 14" fill="none">
+        <rect x="0.5" y="0.5" width="23" height="13" rx="3.5" stroke="#1d1b20" stroke-opacity=".35"/>
+        <rect x="2" y="2" width="18" height="10" rx="2" fill="#1d1b20"/>
+        <path d="M25 4.5v5a2.5 2.5 0 0 0 0-5z" fill="#1d1b20" opacity=".4"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- Top Bar -->
+  <div class="top-bar">
+    <div class="top-bar-inner">
+      <div class="top-bar-back">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+          <path d="M15 18l-6-6 6-6" stroke="#1c2b2e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="top-bar-text">
+        <div class="top-bar-title">Documents Uploaded</div>
+        <div class="top-bar-subtitle">Matching policy documents are grouped<br>together automatically</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Doc Upload Cards -->
+  <div class="cards-container">
+
+    <!-- Card 1: Home Insurance (open list) -->
+    <div class="doc-card">
+      <div class="doc-card-header">
+        <div class="doc-card-left">
+          <div class="icon-container">
+            <!-- Building/Business icon -->
+            <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+              <rect x="3" y="6" width="16" height="13" rx="1.5" stroke="#0c8ca6" stroke-width="1.4" fill="none"/>
+              <path d="M7 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2" stroke="#0c8ca6" stroke-width="1.4" fill="none"/>
+              <rect x="8.5" y="11" width="5" height="5" rx=".75" fill="#0c8ca6"/>
+            </svg>
+          </div>
+          <div class="doc-card-info">
+            <div class="doc-card-name">Claire Brown | Home Insurance...</div>
+            <div class="doc-files-list">
+              <ul style="list-style:disc; padding-left:18px;">
+                <li class="doc-file-item">Declaration doc.pdf</li>
+                <li class="doc-file-item">Policy Form.docx</li>
+              </ul>
+              <div class="doc-files-chevron">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <path d="M10 6l-3 3-3-3" stroke="#516c71" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </div>
+            </div>
+            <div class="doc-meta">
+              <div class="doc-policy-num">12-50-00-2451-12456893</div>
+              <div class="doc-tags">
+                <span class="doc-tag">Home Insurance</span>
+                <div class="dot"></div>
+                <span class="doc-tag">State Farm</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="trash-btn">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <path d="M3 5h14M8 5V3h4v2" stroke="#516c71" stroke-width="1.3" stroke-linecap="round"/>
+            <path d="M5 5l1 12h8l1-12" stroke="#516c71" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            <path d="M8 9v5M12 9v5" stroke="#516c71" stroke-width="1.3" stroke-linecap="round"/>
+          </svg>
+        </div>
+      </div>
+      <div class="doc-card-actions">
+        <button class="btn-primary-sm"><span>Generate Insights</span></button>
+        <button class="btn-text-sm"><span>Preview</span></button>
+      </div>
+    </div>
+
+    <!-- Card 2: Car Insurance (generate insight) -->
+    <div class="doc-card">
+      <div class="doc-card-header">
+        <div class="doc-card-left">
+          <div class="icon-container">
+            <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+              <rect x="3" y="6" width="16" height="13" rx="1.5" stroke="#0c8ca6" stroke-width="1.4" fill="none"/>
+              <path d="M7 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2" stroke="#0c8ca6" stroke-width="1.4" fill="none"/>
+              <rect x="8.5" y="11" width="5" height="5" rx=".75" fill="#0c8ca6"/>
+            </svg>
+          </div>
+          <div class="doc-card-info">
+            <div class="doc-card-name">Car Insurance.pdf</div>
+            <div class="doc-meta">
+              <div class="doc-policy-num">00-20-124545144</div>
+              <div class="doc-tags">
+                <span class="doc-tag">Car Insurance</span>
+                <div class="dot"></div>
+                <span class="doc-tag">State Farm</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="trash-btn">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <path d="M3 5h14M8 5V3h4v2" stroke="#516c71" stroke-width="1.3" stroke-linecap="round"/>
+            <path d="M5 5l1 12h8l1-12" stroke="#516c71" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            <path d="M8 9v5M12 9v5" stroke="#516c71" stroke-width="1.3" stroke-linecap="round"/>
+          </svg>
+        </div>
+      </div>
+      <div class="doc-card-actions">
+        <button class="btn-primary-sm"><span>Generate Insights</span></button>
+        <button class="btn-text-sm"><span>Preview</span></button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Go To My Files Button (behind overlay) -->
+  <button class="btn-go-files" style="bottom:30px;">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="transform:rotate(180deg)">
+      <path d="M8 2v9M5 8l3 3 3-3" stroke="#0c8ca6" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M2 13h12" stroke="#0c8ca6" stroke-width="1.3" stroke-linecap="round"/>
+    </svg>
+    <span>Go To My Files</span>
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+      <path d="M8 2v9M5 8l3 3 3-3" stroke="#0c8ca6" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M2 13h12" stroke="#0c8ca6" stroke-width="1.3" stroke-linecap="round"/>
+    </svg>
+  </button>
+
+  <!-- Dimmed Overlay -->
+  <div class="overlay"></div>
+
+  <!-- Insight Meter Popup -->
+  <div class="popup">
+
+    <!-- Top: title + policy info + meter -->
+    <div class="popup-top">
+      <div class="popup-header-row">
+        <div class="popup-title-row">
+          <span class="popup-title">Insights Quality Meter</span>
+          <button class="close-btn" style="background:none;border:none;padding:0;">
+            <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+              <circle cx="11" cy="11" r="9.5" stroke="#516c71" stroke-width="1.2"/>
+              <path d="M8 8l6 6M14 8l-6 6" stroke="#516c71" stroke-width="1.4" stroke-linecap="round"/>
+            </svg>
+          </button>
+        </div>
+        <div>
+          <div class="popup-policy-type">Car Insurance</div>
+          <div class="popup-policy-num">12-50-00-2451-12456893</div>
+        </div>
+      </div>
+
+      <!-- Meter gauge card -->
+      <div class="meter-card">
+        <div class="meter-gauge-wrap">
+          <!-- Gauge image from Figma asset (valid for 7 days) -->
+          <img
+            class="meter-gauge-img"
+            src="https://www.figma.com/api/mcp/asset/dcb46fb2-b8a4-45cb-9854-6b89c57ad7ed"
+            alt="Insights Quality Meter - Basic level"
+          />
+          <span class="meter-label">Basic</span>
+        </div>
+        <p class="meter-desc">Add more documents to unlock deeper analysis.</p>
+      </div>
+    </div>
+
+    <!-- Coverage section -->
+    <div class="coverage-section">
+      <span class="coverage-label">Document coverage (1 of 4 added)</span>
+      <div class="coverage-list">
+
+        <!-- Declaration page — Complete -->
+        <div class="coverage-item">
+          <div class="coverage-item-left">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+              <circle cx="9" cy="9" r="8" stroke="#22c55e" stroke-width="1.4"/>
+              <path d="M5.5 9l2.5 2.5 4.5-5" stroke="#22c55e" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span class="coverage-item-name">Declaration page</span>
+          </div>
+          <span class="coverage-item-status">Complete</span>
+        </div>
+
+        <!-- Policy form — Missing -->
+        <div class="coverage-item">
+          <div class="coverage-item-left">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+              <path d="M5 5l8 8M13 5l-8 8" stroke="#ef4444" stroke-width="1.4" stroke-linecap="round"/>
+            </svg>
+            <span class="coverage-item-name missing">Policy form</span>
+          </div>
+          <span class="coverage-item-status missing">Missing</span>
+        </div>
+
+        <!-- Endorsement form — Missing -->
+        <div class="coverage-item">
+          <div class="coverage-item-left">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+              <path d="M5 5l8 8M13 5l-8 8" stroke="#ef4444" stroke-width="1.4" stroke-linecap="round"/>
+            </svg>
+            <span class="coverage-item-name missing">Endorsement form</span>
+          </div>
+          <span class="coverage-item-status missing">Missing</span>
+        </div>
+
+        <!-- State endorsement — Missing -->
+        <div class="coverage-item">
+          <div class="coverage-item-left">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+              <path d="M5 5l8 8M13 5l-8 8" stroke="#ef4444" stroke-width="1.4" stroke-linecap="round"/>
+            </svg>
+            <span class="coverage-item-name missing">State endorsement</span>
+          </div>
+          <span class="coverage-item-status missing">Missing</span>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="popup-actions">
+      <span class="popup-hint">You can enhance insights later anytime.</span>
+      <button class="btn-generate"><span>Generate Insights</span></button>
+      <button class="btn-upload-more"><span>Upload More</span></button>
+    </div>
+
+  </div><!-- /popup -->
+
+</div><!-- /screen -->
+
+</body>
+</html>
